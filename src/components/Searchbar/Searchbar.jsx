@@ -1,50 +1,41 @@
-import { Component } from "react";
+import {useState } from "react";
 import { Header, Form, Input,Button } from './Searchbar.styled';
 
-export class Searchbar extends Component {
+export const Searchbar = ({ onSubmit }) => {
 
-  state = {
-    search:''
-  }
+  const [search, setSearch] = useState('')
 
-  onChange = evt => {
-    const searchValue = evt.currentTarget.value.toLowerCase();
-    this.setState({ search: searchValue })
-  };
+  const onChange = evt => setSearch(evt.target.value);
 
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.search.trim() === '') {
-      return  alert('Введіть дані для пошуку')
+    if (search.trim() === '') {
+      return alert('Введіть дані для пошуку')
     }
+    onSubmit(search);
+    setSearch('');
+  };
 
-    this.props.onSubmit(this.state.search)
-    this.setState({ search: '' })
-  }
-
-
-  render() {
-    return (
-      <Header className="searchbar">
-  <Form className="form" onSubmit={this.handleSubmit}>
-          <Input
-            name='search'
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.search}
-            onChange={this.onChange}
-          />
-          <Button type="submit" className="button">
-      <span className="button-label">Search</span>
-    </Button>
-  </Form>
-</Header>
-    )
-  }
-
-}
+  
+  return (
+    <Header className="searchbar">
+      <Form className="form" onSubmit={handleSubmit}>
+        <Input
+          name='search'
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={search}
+          onChange={onChange}
+        />
+        <Button type="submit" className="button">
+          <span className="button-label">Search</span>
+        </Button>
+      </Form>
+    </Header>
+  )
+};
 
 

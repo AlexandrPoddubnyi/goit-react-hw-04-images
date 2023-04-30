@@ -1,5 +1,3 @@
-
-
 import styled from '@emotion/styled';
 
 export const Overlay = styled.div`
@@ -16,7 +14,9 @@ export const Overlay = styled.div`
 `;
 
 export const ModalContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   max-width: 80vw;
-  max-height:100vh;
-  
+  max-height:100vh; 
 `;

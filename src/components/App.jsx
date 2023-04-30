@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState,useEffect } from "react";
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { fetchImages } from './API/api';
@@ -7,91 +7,79 @@ import { MoreButton } from './Button/Button';
 import Loader from './Loader/Loader'
 import { Modal } from "./Modal/Modal";
 import { Box } from './Box'
-// ToastContainer,
-
-export class App extends Component {
-
-  state = {
-    search: '',
-    images: [],
-    page: 1,
-    isLoading: false,
-    error: null
-  };
 
 
-  componentDidUpdate(prevProps, prevState) {
-    const { page, search } = this.state;
-    const perPage = 12;
-    // const prevSearch = prevProps.search;
-    // const currentSearch = this.props.search;
-    if (prevState.search !== search || prevState.page !== page) {
-      this.setState({ isLoading: true });
-      fetchImages(search, page, perPage)
-        .then(({ hits, totalHits }) => {
-          const totalPages = totalHits / perPage;
-          if (totalHits === 0) {
-            this.setState({ isLoading: false });
-            return toast.error('Sorry, no images found. Please, try again!');  
-          }
-          if (page === 1) {
-            toast.success(`Hooray! We found ${totalHits} images.`);
-          }
-          if (page > totalPages) {
-            toast.info("You've reached the end of search results.");
-          }
-          this.setState(({ images }) => ({
-            images: [...images, ...hits],
-            total: totalHits,
-            isLoading: false,
-          }));     
-        })
-      .catch(error => this.setState({ error }));
-    };
-  };
 
 
-  handleSubmit = searchInput => {
-    if (searchInput === this.state.search) {
+export const App = () => {
+
+  const [search, setSearch] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [largeImage, setLargeImage] = useState('');
+  const [total, setTotal] = useState('')
+  
+  useEffect(() => {
+    const perPage = 12
+    if (search) {
+      setIsLoading(true)
+    } 
+    if (search !== '') {
+          fetchImages (search, page, perPage)
+      .then(({ hits, totalHits }) => {
+        const totalPages = totalHits / perPage;
+        if (totalHits === 0) {
+          setIsLoading(false);
+          return toast.error('Sorry, no images found. Please, try again!')
+        }
+        if (page === 1) {
+          toast.success(`Hooray! We found ${totalHits} images.`);
+        }
+        if (page > totalPages) {
+          toast.info("You've reached the end of search results.")
+        }
+        setImages(prevState =>[...prevState, ...hits]);
+        setTotal(totalHits);
+        setIsLoading(false);
+        
+      })
+      .catch(setError(error))
+
+    }
+  },[error, page, search]);
+
+  
+
+
+  const handleSubmit = searchInput => {
+    if (searchInput === search) {
       return;
     }
-    this.setState({
-      search: searchInput,
-      images: [],
-      page: 1,
-      error: null
-    });
+    setSearch(searchInput);
+    setImages([]);
+    setPage(1)
+    setError(null)
   };
 
 
-  onOpenModal = url => {
-    this.setState({
-      largeImage: url,
-    });
-};
+  const onOpenModal = url => {
+    setLargeImage(url)
+  };
   
   
-  onModalClose = () => {
-    this.setState({
-      largeImage: '',
-    });
+  const onModalClose = () => {
+    setLargeImage('')
    };
   
   
-  onLoadMore = () => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-      isLoading: true,
-    }));
+  const onLoadMore = () => {
+    setPage(page + 1);
+    setIsLoading(true);
  };
   
-
-
-
-  render() {
     
-    const {images, total, largeImage, isLoading} = this.state;
-
     return (
    
     <Box
@@ -101,24 +89,24 @@ export class App extends Component {
         alignItems="center"
         background-color= "#999999"
     >
-      <Searchbar onSubmit={this.handleSubmit} />
+      <Searchbar onSubmit={handleSubmit} />
       {images.length > 0 && (
         <>
-          <ImageGallery images={images} onClick={this.onOpenModal} />
+          <ImageGallery images={images} onClick={onOpenModal} />
           {total !== images.length && (
-            <MoreButton type="button" onClick={this.onLoadMore}>
+            <MoreButton type="button" onClick={onLoadMore}>
               Load More
             </MoreButton>
           )}
         </>
       )}
         {largeImage && (
-        <Modal closeModal={this.onModalClose} url={largeImage}/>
+        <Modal closeModal={onModalClose} url={largeImage}/>
         )}
         {isLoading && <Loader />}
     </Box>
        
         
     );
-  }
+  
 };
